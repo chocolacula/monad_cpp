@@ -3,7 +3,8 @@
 It's educational project, made with one purpose - teach students Functional Programming.  
 `Monad` is one of key concept in Functional Programming and quite usefull in software engineering in general.
 
-It simplifies **Error** handling an reduce branching by hiding them inside their implementation.  
+It simplifies **Error** handling and reduce branching by hiding them inside their implementation.  
+And another piece of good news is that the special monadic operator substantially reduces the amount of brackets.  
 With **Monads** you can turn this:
 
 ```c++
