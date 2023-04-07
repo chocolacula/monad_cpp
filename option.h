@@ -68,8 +68,7 @@ class Option : public Monad<Option<T>> {
   friend Monad<Option<T>>;
 
   template <typename F>
-  static typename std::enable_if_t<is_same_container_v<Option<T>, std::result_of_t<F(T)>>, std::result_of_t<F(T)>>
-  // SFINAE
+  static typename std::result_of_t<F(T)>  //
   bind_over(Option<T>* self, F fn) {
     // branch with 'Just'
     if (self->is_val()) {
@@ -80,9 +79,7 @@ class Option : public Monad<Option<T>> {
   }
 
   template <typename F>
-  static typename std::enable_if_t<is_same_container_v<Option<T>, std::result_of_t<F()>>, std::result_of_t<F()>>
-  // SFINAE
-  bind_next_over(F fn) {
+  static auto bind_next_over(F fn) {
     return fn();
   }
 };
