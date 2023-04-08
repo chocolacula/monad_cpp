@@ -6,11 +6,11 @@ struct nested;
 template <template <typename, typename...> typename ContainerT,  //
           typename T, typename... ArgT>
 struct nested<ContainerT<T, ArgT...>> {
-  using value_type = T;
+  using value_type1 = T;
 };
 
 template <typename T>
-using nested_t = typename nested<T>::value_type;
+using nested_t1 = typename nested<T>::value_type1;
 
 template <typename T1, typename T2>
 struct is_same_container : std::false_type {};

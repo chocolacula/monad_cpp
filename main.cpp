@@ -6,23 +6,37 @@
 #include <vector>
 
 #include "option.h"
+#include "result.h"
 
-// monadic functions
-auto show_m() {
-  return [=](auto x) -> Option<decltype(x)> {
-    std::cout << "Val " << x << std::endl;
-    // like in Haskell 'return' wraps a value to the context
-    // because we have explicit return type of the lambda
-    return std::move(x);
-  };
+template <typename T>
+auto show(const Option<T>& m) {
+  if (m.is_val()) {
+    std::cout << "Val " << m.val() << std::endl;
+  } else {
+    std::cout << "None" << std::endl;
+  }
 }
 
+template <typename T, typename E>
+auto show(const Result<T, E>& m) {
+  if (m.is_val()) {
+    std::cout << "Ok " << m.val() << std::endl;
+  } else {
+    std::cout << "Error " << m.err() << std::endl;
+  }
+}
+
+// monadic functions
 auto filter_m(double treshold) {
   return [=](auto x) { return x < treshold ? Option(x) : None(); };
 }
 
 auto div_m(double a) {
-  return [=](auto x) { return Option(double(x) / a); };
+  return [=](auto x) -> Option<double> {
+    // like in Haskell 'return' wraps a value to the context
+    // because we have explicit return type of the lambda
+    return double(x) / a;
+  };
 }
 
 template <typename T>
@@ -36,21 +50,26 @@ auto set_m(T x) {
 }
 
 int main() {
+  std::cout << "Use Option<T> and Monadic lambdas" << std::endl;
 
-  auto a = Option<int>(5);
+  auto o = Option<int>(5);
 
-  std::cout << "Do without Monads" << std::endl;
+  show(
+      o >> [](double x) { return Option(x / 2 + 3); }  //
+      >> [](auto x) { return x < 10 ? Option(x) : None(); });
 
-  a.show().transform([](int x) { return Option((double)x / 2); }).show().filter([](auto x) { return x > 10; }).show();
+  std::cout << "Or Monadic functions" << std::endl;
 
-  std::cout << "Do the same with Monadic lambdas" << std::endl;
+  show(o >> div_m(2.0) >> filter_m(10) >> add_m(3.0));
 
-  a >> [](int x) { return Option((double)x / 2 + 3); } >> [](auto x) { return x < 10 ? Option(x) : None(); } >>
-      show_m();
+  std::cout << "Use Result<T, E> and Monadic lambdas" << std::endl;
 
-  std::cout << "Or with Monadic functions" << std::endl;
+  using R = Result<double, std::string>;
+  auto r = R(5);
 
-  a >> div_m(2.0) >> filter_m(10) >> add_m(3.0) >> show_m();
+  show(
+      r >> [](double x) { return R(x / 2 + 3); }  //
+      >> [](auto x) { return x < 10 ? x : R("x is bigger than 10!"); });
 
   return 0;
 }

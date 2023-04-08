@@ -1,7 +1,6 @@
-#include <functional>
-#include <iostream>
+#pragma once
+
 #include <stdexcept>
-#include <type_traits>
 
 #include "monad.h"
 
@@ -15,13 +14,20 @@ class Option : public Monad<Option<T>> {
 
  public:
   Option(None none)  // NOLINT implicit
-      : Monad<Option<T>>(this), _is_val(false) {
+      : _is_val(false) {
   }
   Option(const T& val)  // NOLINT implicit
-      : Monad<Option<T>>(this), _is_val(true), _val(val) {
+      : _is_val(true), _val(val) {
   }
   Option(T&& val)  // NOLINT implicit
-      : Monad<Option<T>>(this), _is_val(true), _val(std::move(val)) {
+      : _is_val(true), _val(std::move(val)) {
+  }
+
+  const T& val_safe() const {
+    if (_is_val) {
+      return _val;
+    }
+    throw std::runtime_error("Option<T> is None");
   }
 
   T& val_safe() {
@@ -31,48 +37,32 @@ class Option : public Monad<Option<T>> {
     throw std::runtime_error("Option<T> is None");
   }
 
-  bool is_val() {
+  const T& val() const {
+    return _val;
+  }
+
+  T& val() {
+    return _val;
+  }
+
+  bool is_val() const {
     return _is_val;
   }
-  bool is_none() {
+
+  bool is_none() const {
     return !_is_val;
-  }
-
-  Option<T> show() {
-    if (is_val()) {
-      std::cout << "Val " << _val << std::endl;
-    } else {
-      std::cout << "None" << std::endl;
-    }
-    return *this;
-  }
-
-  Option<T> filter(std::function<bool(T)> fn) {
-    if (is_val() && fn(_val)) {
-      return *this;
-    }
-    return None();
-  }
-
-  template <typename F>
-  typename std::enable_if_t<is_same_container_v<Option<T>, std::result_of_t<F(T)>>, std::result_of_t<F(T)>>
-  // SFINAE
-  transform(F fn) {
-    if (is_val()) {
-      return fn(_val);
-    }
-    return None();
   }
 
  private:
   friend Monad<Option<T>>;
 
   template <typename F>
-  static typename std::result_of_t<F(T)>  //
-  bind_over(Option<T>* self, F fn) {
+  typename std::result_of_t<F(T)>  //
+  bind_over(F fn) {
+    monad_assert<Option<T>, F, T>();
     // branch with 'Just'
-    if (self->is_val()) {
-      return fn(self->_val);
+    if (is_val()) {
+      return fn(_val);
     }
     // brunch with 'Nothing'
     return None();
@@ -80,6 +70,7 @@ class Option : public Monad<Option<T>> {
 
   template <typename F>
   static auto bind_next_over(F fn) {
+    monad_assert<Option<T>, F>();
     return fn();
   }
 };
