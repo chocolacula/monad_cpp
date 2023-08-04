@@ -64,7 +64,7 @@ class Option : public Monad<Option<T>> {
     if (is_val()) {
       return fn(_val);
     }
-    // brunch with 'Nothing'
+    // branch with 'Nothing'
     return None();
   }
 

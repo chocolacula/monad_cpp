@@ -27,8 +27,8 @@ auto show(const Result<T, E>& m) {
 }
 
 // monadic functions
-auto filter_m(double treshold) {
-  return [=](auto x) { return x < treshold ? Option(x) : None(); };
+auto filter_m(double threshold) {
+  return [=](auto x) { return x < threshold ? Option(x) : None(); };
 }
 
 auto div_m(double a) {

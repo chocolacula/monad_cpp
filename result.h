@@ -91,7 +91,7 @@ class Result : public Monad<Result<T, E>> {
     if (is_val()) {
       return fn(std::get<T>(_val));
     }
-    // brunch with 'Error'
+    // branch with 'Error'
     return E();
   }
 
